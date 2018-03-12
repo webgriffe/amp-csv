@@ -82,3 +82,4 @@ This library is under the MIT license. See the complete license in the LICENSE f
 Credits
 -------
 Developed by [Webgriffe®](http://www.webgriffe.com/).
+Thanks also to [Niklas Keller](https://github.com/kelunik) for his help about converting ReactPHP stream events to an Amp's Iterator (see [https://github.com/reactphp/promise-stream/issues/14](https://github.com/reactphp/promise-stream/issues/14)).
