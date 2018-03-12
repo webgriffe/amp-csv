@@ -1,5 +1,7 @@
 # AMP Comma Separated Values Library
 
+[![Build Status](https://travis-ci.org/webgriffe/amp-csv.svg?branch=master)](https://travis-ci.org/webgriffe/amp-csv)
+
 CSV library to use with [Amp](https://amphp.org/) PHP framework.
 Currently it implements only an iterator which allows to parse CSV rows one at a time.
 
