@@ -7,7 +7,7 @@ Currently it implements only an iterator which allows to parse CSV rows one at a
 
 Require this package using [Composer](https://getcomposer.org/):
 
-  composer require webgriffe/amp-csv
+    composer require webgriffe/amp-csv
   
 ## Iterator Usage
 
