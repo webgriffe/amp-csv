@@ -2,12 +2,11 @@
 
 namespace Webgriffe\AmpCsv;
 
+use function Amp\call;
 use Amp\Emitter;
 use Amp\Iterator as AmpIterator;
 use Amp\Promise;
-use Amp\ReactAdapter\ReactAdapter;
-use Rakdar\React\Csv\Reader;
-use React\Stream\ReadableResourceStream;
+use Amp\File;
 
 class Iterator implements AmpIterator
 {
@@ -41,51 +40,7 @@ class Iterator implements AmpIterator
         $this->csvFile = $csvFile;
         $this->firstLineIsHeader = $firstLineIsHeader;
         $this->emitter = new Emitter();
-        $this->attachHandlers();
-    }
-
-    /**
-     * @throws \LogicException
-     * @throws \RuntimeException
-     * @throws \InvalidArgumentException
-     * @throws \Error
-     */
-    private function attachHandlers()
-    {
-        $stream = new ReadableResourceStream(fopen($this->csvFile, 'rb'), ReactAdapter::get());
-        if (!$stream->isReadable()) {
-            $this->emitter->complete();
-        }
-
-        $reader = new Reader($stream);
-        $reader->setParseHeader($this->firstLineIsHeader);
-        $reader->on('end', function () {
-            $this->emitter->complete();
-        });
-        $reader->on('error', function (\Throwable $error) {
-            $this->emitter->fail($error);
-        });
-        $reader->on('close', function () {
-            $this->emitter->fail(new \RuntimeException('Stream closed'));
-        });
-        $reader->on('header', function (array $header) {
-            $this->header = $header;
-        });
-        $reader->on('data', function (array $row) use ($reader) {
-            if ($this->firstLineIsHeader) {
-                if (\count($this->header) !== \count($row)) {
-                    $this->emitter->fail(
-                        new \LogicException(
-                            sprintf('Invalid number of columns at line %d of given CSV file.', $reader->getRowsParsed())
-                        )
-                    );
-                    $reader->close();
-                    return;
-                }
-                $row = array_combine($this->header, $row);
-            }
-            $this->emitter->emit($row);
-        });
+        $this->attachEmitter();
     }
 
     /**
@@ -113,5 +68,33 @@ class Iterator implements AmpIterator
     public function getCurrent()
     {
         return $this->emitter->iterate()->getCurrent();
+    }
+
+    private function attachEmitter()
+    {
+        call(function () {
+            $parser = new Parser(yield File\open($this->csvFile, 'rb'));
+            $header = null;
+            if ($this->firstLineIsHeader) {
+                $header = yield $parser->parseRow();
+            }
+            while ($row = yield $parser->parseRow()) {
+                if ($this->firstLineIsHeader) {
+                    if (\count($header) !== \count($row)) {
+                        $this->emitter->fail(
+                            new \LogicException(
+                                sprintf(
+                                    'Invalid number of columns at line %d of given CSV file.',
+                                    $parser->getRowsParsed()
+                                )
+                            )
+                        );
+                        return;
+                    }
+                    $row = array_combine($header, $row);
+                }
+                $this->emitter->emit($row);
+            }
+        });
     }
 }
