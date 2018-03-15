@@ -6,7 +6,8 @@
          beStrictAboutCoversAnnotation="true"
          beStrictAboutOutputDuringTests="true"
          beStrictAboutTodoAnnotatedTests="true"
-         verbose="true">
+         verbose="true"
+         processIsolation="true">
     <testsuite name="default">
         <directory suffix="Test.php">tests</directory>
     </testsuite>
@@ -17,7 +18,10 @@
         </whitelist>
     </filter>
 
-    <listeners>
-        <listener class="Amp\PHPUnit\LoopReset" />
-    </listeners>
+    <!-- Enabling Amp\PHPUnit\LoopReset listener causes a segmentation fault with PHP 7.1 -->
+    <!-- See: https://travis-ci.org/webgriffe/amp-csv/jobs/353701614 -->
+    <!-- We enabled process isolation instead -->
+    <!--<listeners>-->
+        <!--<listener class="Amp\PHPUnit\LoopReset" />-->
+    <!--</listeners>-->
 </phpunit>
