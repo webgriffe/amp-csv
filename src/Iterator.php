@@ -95,6 +95,7 @@ class Iterator implements AmpIterator
                 }
                 $this->emitter->emit($row);
             }
+            $this->emitter->complete();
         });
     }
 }
