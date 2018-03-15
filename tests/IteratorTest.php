@@ -5,13 +5,14 @@ namespace Webgriffe\AmpCsv;
 use Amp\Iterator as AmpIterator;
 use Amp\Loop;
 use PHPUnit\Framework\TestCase;
+use Amp\File;
+use function Amp\Promise\wait;
 
 class IteratorTest extends TestCase
 {
     public function testIterate()
     {
-        $csvFile = __DIR__ . '/many-countries.csv';
-        $iterator = new Iterator($csvFile);
+        $iterator = $this->createIterator(__DIR__ . '/many-countries.csv');
 
         $rows = $this->runIterator($iterator);
 
@@ -22,8 +23,7 @@ class IteratorTest extends TestCase
 
     public function testIterateWithFirstLineNotHeader()
     {
-        $csvFile = __DIR__ . '/countries-wihtout-header.csv';
-        $iterator = new Iterator($csvFile, false);
+        $iterator = $this->createIterator(__DIR__ . '/countries-wihtout-header.csv', false);
 
         $rows = $this->runIterator($iterator);
 
@@ -48,7 +48,7 @@ class IteratorTest extends TestCase
      */
     public function testDifferentNumberOfColumnsBetweenHeaderAndValuesShouldThrowAnException()
     {
-        $iterator = new Iterator(__DIR__ . '/different-number-of-columns-between-header-and-values.csv');
+        $iterator = $this->createIterator(__DIR__ . '/different-number-of-columns-between-header-and-values.csv');
         $this->runIterator($iterator);
     }
 
@@ -67,5 +67,19 @@ class IteratorTest extends TestCase
             }
         );
         return $rows;
+    }
+
+    /**
+     * @param string $csvFile
+     * @param bool $firstLineIsHeader
+     * @return Iterator
+     * @throws \Error
+     * @throws \Throwable
+     * @throws \TypeError
+     */
+    private function createIterator(string $csvFile, bool $firstLineIsHeader = true): Iterator
+    {
+        $iterator = new Iterator(new Parser(wait(File\open($csvFile, 'rb'))), $firstLineIsHeader);
+        return $iterator;
     }
 }

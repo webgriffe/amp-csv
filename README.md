@@ -15,7 +15,7 @@ Require this package using [Composer](https://getcomposer.org/):
 
 This library implements an Amp's [Iterator](https://amphp.org/amp/iterators/) which allows to iterate over CSV rows one at a time.
 Potentially it can parse very large CSV files because only small chunks are kept in memory.
-See the following example, given this CSV:
+See the following example, given this CSV file (`path/to/file.csv`):
 
 ```csv
 Name,Description,Price,Stock
@@ -28,10 +28,14 @@ We can have:
 ```php
 <?php
 
+use Webgriffe\AmpCsv\Iterator;
+use Webgriffe\AmpCsv\Parser;
+use Amp\File;
+
 require_once 'vendor/autoload.php';
 
 \Amp\Loop::run(function () {
-    $iterator = new \Webgriffe\AmpCsv\Iterator(__DIR__ . '/test.csv');
+    $iterator = new Iterator(new Parser(yield File\open('path/to/file.csv', 'rb')));
     while (yield $iterator->advance()) {
         $rows[] = $iterator->getCurrent();
     }
@@ -58,12 +62,12 @@ array(
 ),
 ```
 
-By default the iterator treats the first line as header and will use the column names to index the row values.
+By default the iterator treats the first line as header and will use the column names to index row values.
 If a row has a different column number than header an exception will be thrown.
-If your CSV doesn't have an header as first line you can disable header parsing by passing `false` as constructor's second argument:
+If your CSV doesn't have an header as first line you can disable the header parsing by passing `false` as constructor's second argument:
 
 ```php
-$iterator = new \Webgriffe\AmpCsv\Iterator(__DIR__ . '/test.csv',  false);
+$iterator = new Iterator(new Parser(yield File\open('path/to/file.csv', 'rb')), false);
 ```
 
 Contributing

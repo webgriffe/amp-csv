@@ -11,9 +11,9 @@ use Amp\File;
 class Iterator implements AmpIterator
 {
     /**
-     * @var string
+     * @var Parser
      */
-    private $csvFile;
+    private $csvParser;
     /**
      * @var Emitter
      */
@@ -29,15 +29,15 @@ class Iterator implements AmpIterator
 
     /**
      * Iterator constructor.
-     * @param string $csvFile
+     * @param Parser $csvParser
      * @param bool $firstLineIsHeader
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
      * @throws \Error
      */
-    public function __construct(string $csvFile, bool $firstLineIsHeader = true)
+    public function __construct(Parser $csvParser, bool $firstLineIsHeader = true)
     {
-        $this->csvFile = $csvFile;
+        $this->csvParser = $csvParser;
         $this->firstLineIsHeader = $firstLineIsHeader;
         $this->emitter = new Emitter();
         $this->attachEmitter();
@@ -73,19 +73,18 @@ class Iterator implements AmpIterator
     private function attachEmitter()
     {
         call(function () {
-            $parser = new Parser(yield File\open($this->csvFile, 'rb'));
             $header = null;
             if ($this->firstLineIsHeader) {
-                $header = yield $parser->parseRow();
+                $header = yield $this->csvParser->parseRow();
             }
-            while ($row = yield $parser->parseRow()) {
+            while ($row = yield $this->csvParser->parseRow()) {
                 if ($this->firstLineIsHeader) {
                     if (\count($header) !== \count($row)) {
                         $this->emitter->fail(
                             new \LogicException(
                                 sprintf(
                                     'Invalid number of columns at line %d of given CSV file.',
-                                    $parser->getRowsParsed()
+                                    $this->csvParser->getRowsParsed()
                                 )
                             )
                         );
