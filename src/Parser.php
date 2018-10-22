@@ -44,6 +44,9 @@ class Parser
     public function parseRow(): Promise
     {
         return call(function () {
+            if ($this->fileHandle->eof()) {
+                return null;
+            }
             $buffer = '';
             $newLinePos = null;
             while ($chunk = yield $this->fileHandle->read()) {
@@ -53,12 +56,12 @@ class Parser
                     break;
                 }
             }
-            $bufferSize = \strlen($buffer);
-            $seekOffset = $bufferSize-$newLinePos;
-            yield $this->fileHandle->seek(-($seekOffset-1), \SEEK_CUR);
-            $row = substr($buffer, 0, $newLinePos);
-            if (empty($row)) {
-                return null;
+            $row = $buffer;
+            if ($newLinePos !== false) {
+                $bufferSize = \strlen($buffer);
+                $seekOffset = $bufferSize-$newLinePos;
+                yield $this->fileHandle->seek(-($seekOffset-1), \SEEK_CUR);
+                $row = substr($buffer, 0, $newLinePos);
             }
             $this->rowsParsed++;
             return str_getcsv($row, $this->delimiter, $this->enclosure, $this->escape);

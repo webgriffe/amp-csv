@@ -79,4 +79,23 @@ class ParserTest extends TestCase
             $rows[2]
         );
     }
+
+    public function testParseFileWithEmptyRows()
+    {
+        $rows = [];
+        Loop::run(function () use (&$rows) {
+            $parser = new Parser(yield File\open(__DIR__ . '/empty-rows.csv', 'rb'));
+            while ($row = yield $parser->parseRow()) {
+                $rows[] = $row;
+            }
+            $this->assertEquals(10, $parser->getRowsParsed());
+        });
+        $this->assertCount(10, $rows);
+        $this->assertEquals(['sku', 'qty'], $rows[0]);
+        $this->assertEquals(['AAA', '123'], $rows[1]);
+        $this->assertEquals(['', '2'], $rows[3]);
+        $this->assertEquals(['A'], $rows[4]);
+        $this->assertEquals([''], $rows[8]);
+        $this->assertEquals(['test'], $rows[9]);
+    }
 }
