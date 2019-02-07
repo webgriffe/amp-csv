@@ -53,6 +53,16 @@ class Parser
                 $buffer .= $chunk;
                 $newLinePos = strpos($buffer, PHP_EOL);
                 if ($newLinePos !== false) {
+                    $shouldBreak = false;
+                    while (!$shouldBreak) {
+                        $enclosuresFoundBeforeNewline = substr_count(substr($buffer, 0, $newLinePos), $this->enclosure);
+                        $newslineIsInTheMiddleOfAnEnclosedString = (($enclosuresFoundBeforeNewline % 2) === 1);
+                        if ($newslineIsInTheMiddleOfAnEnclosedString) {
+                            $newLinePos = strpos($buffer, PHP_EOL, $newLinePos + 1);
+                            continue;
+                        }
+                        $shouldBreak = true;
+                    }
                     break;
                 }
             }
