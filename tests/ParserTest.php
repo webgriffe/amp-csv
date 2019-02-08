@@ -139,4 +139,29 @@ TXT;
         $this->assertEquals($expectedAlgeriaName, $rows[3][0]);
         $this->assertEquals($expectedAlgeriaDescription, $rows[3][1]);
     }
+
+    public function testParseFileWithEscapedCharactersInValues()
+    {
+        $this->markTestSkipped('To Be Implemented');
+        $rows = [];
+        Loop::run(function () use (&$rows) {
+            $parser = new Parser(yield File\open(__DIR__ . '/countries-with-escaped-charactes-in-value.csv', 'rb'));
+            while ($row = yield $parser->parseRow()) {
+                $rows[] = $row;
+            }
+            $this->assertCount(4, $rows);
+        });
+        $expectedAlgeriaDescription = <<<TXT
+the "People's Democratic" Republic
+of Algeria
+TXT;
+        $this->assertCount(4, $rows);
+        $this->assertEquals(['country', 'description'], $rows[0]);
+        $this->assertEquals('Afghanistan', $rows[1][0]);
+        $this->assertEquals('This is the Islamic Republic of Afghanistan', $rows[1][1]);
+        $this->assertEquals('Albania', $rows[1][0]);
+        $this->assertEquals('"This is "the Republic" of Albania', $rows[1][1]);
+        $this->assertEquals('Algeria', $rows[2][0]);
+        $this->assertEquals($expectedAlgeriaDescription, $rows[2][1]);
+    }
 }
