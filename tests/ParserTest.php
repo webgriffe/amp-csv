@@ -164,4 +164,21 @@ TXT;
         $this->assertEquals('Algeria', $rows[2][0]);
         $this->assertEquals($expectedAlgeriaDescription, $rows[2][1]);
     }
+
+    public function testParseFileWithBom()
+    {
+        $rows = [];
+        Loop::run(function () use (&$rows) {
+            $parser = new Parser(yield File\open(__DIR__ . '/file-with-bom.csv', 'rb'), ';');
+            while ($row = yield $parser->parseRow()) {
+                $rows[] = $row;
+            }
+        });
+        $this->assertCount(3, $rows);
+        $this->assertEquals(
+            'sku',
+            $rows[0][0],
+            'It appears that there is a BOM because the first field of the first row doesn\'t match the expected value.'
+        );
+    }
 }

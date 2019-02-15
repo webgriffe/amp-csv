@@ -83,8 +83,11 @@ class Iterator implements AmpIterator
                         $this->emitter->fail(
                             new \LogicException(
                                 sprintf(
-                                    'Invalid number of columns at line %d of given CSV file.',
-                                    $this->csvParser->getRowsParsed()
+                                    'Invalid number of columns at line %d of given CSV file. Header has %d columns, ' .
+                                    'this line %d columns.',
+                                    $this->csvParser->getRowsParsed(),
+                                    \count($header),
+                                    \count($row)
                                 )
                             )
                         );

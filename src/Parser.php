@@ -44,12 +44,17 @@ class Parser
     public function parseRow(): Promise
     {
         return call(function () {
+            $isFirstRead = $this->fileHandle->tell() === 0;
             if ($this->fileHandle->eof()) {
                 return null;
             }
             $buffer = '';
             $newLinePos = null;
             while ($chunk = yield $this->fileHandle->read()) {
+                if ($isFirstRead) {
+                    $chunk = $this->removeBom($chunk);
+                }
+                $isFirstRead = false;
                 $buffer .= $chunk;
                 $newLinePos = strpos($buffer, PHP_EOL);
                 if ($newLinePos !== false) {
@@ -84,5 +89,18 @@ class Parser
     public function getRowsParsed(): int
     {
         return $this->rowsParsed;
+    }
+
+    /**
+     * @param $chunk
+     * @return string
+     */
+    private function removeBom(string $chunk): string
+    {
+        $bom = pack('CCC', 0xEF, 0xBB, 0xBF);
+        if (strpos($chunk, $bom) === 0) {
+            $chunk = (string)substr($chunk, 3);
+        }
+        return $chunk;
     }
 }
