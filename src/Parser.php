@@ -2,43 +2,29 @@
 
 namespace Webgriffe\AmpCsv;
 
-use function Amp\call;
-use Amp\Promise;
 use Amp\File;
+use Amp\Promise;
+use function Amp\call;
 
 class Parser
 {
-    /**
-     * @var File\Handle
-     */
-    private $fileHandle;
-    /**
-     * @var string
-     */
-    private $delimiter;
-    /**
-     * @var string
-     */
-    private $enclosure;
-    /**
-     * @var string
-     */
-    private $escape;
-    /**
-     * @var int
-     */
-    private $rowsParsed = 0;
+    private string $delimiter;
+
+    private string $enclosure;
+
+    private string $escape;
+
+    private int $rowsParsed = 0;
 
     public function __construct(
-        File\Handle $fileHandle,
-        string $delimiter = ',',
-        string $enclosure = '"',
-        string $escape = "\\"
+        private File\File $fileHandle,
+        string            $delimiter = ',',
+        string            $enclosure = '"',
+        string            $escape = "\\"
     ) {
-        $this->fileHandle = $fileHandle;
         $this->delimiter = $delimiter[0];
         $this->enclosure = $enclosure[0];
-        $this->escape = $escape[0];
+        $this->escape    = $escape[0];
     }
 
     public function parseRow(): Promise
@@ -48,15 +34,15 @@ class Parser
             if ($this->fileHandle->eof()) {
                 return null;
             }
-            $buffer = '';
+            $buffer     = '';
             $newLinePos = null;
             while ($chunk = yield $this->fileHandle->read()) {
                 if ($isFirstRead) {
                     $chunk = $this->removeBom($chunk);
                 }
                 $isFirstRead = false;
-                $buffer .= $chunk;
-                $newLinePos = strpos($buffer, PHP_EOL);
+                $buffer      .= $chunk;
+                $newLinePos  = strpos($buffer, PHP_EOL);
                 if ($newLinePos !== false) {
                     $shouldBreak = false;
                     while (!$shouldBreak) {
@@ -74,11 +60,12 @@ class Parser
             $row = $buffer;
             if ($newLinePos !== false) {
                 $bufferSize = \strlen($buffer);
-                $seekOffset = $bufferSize-$newLinePos;
-                yield $this->fileHandle->seek(-($seekOffset-1), \SEEK_CUR);
+                $seekOffset = $bufferSize - $newLinePos;
+                yield $this->fileHandle->seek(-($seekOffset - 1), \SEEK_CUR);
                 $row = substr($buffer, 0, $newLinePos);
             }
             $this->rowsParsed++;
+
             return str_getcsv($row, $this->delimiter, $this->enclosure, $this->escape);
         });
     }
@@ -93,6 +80,7 @@ class Parser
 
     /**
      * @param $chunk
+     *
      * @return string
      */
     private function removeBom(string $chunk): string
@@ -101,6 +89,7 @@ class Parser
         if (strpos($chunk, $bom) === 0) {
             $chunk = (string)substr($chunk, 3);
         }
+
         return $chunk;
     }
 }
