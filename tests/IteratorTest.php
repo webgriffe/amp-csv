@@ -42,12 +42,11 @@ class IteratorTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException \LogicException
-     * @expectedExceptionMessage Invalid number of columns at line 3 of given CSV file.
-     */
     public function testDifferentNumberOfColumnsBetweenHeaderAndValuesShouldThrowAnException()
     {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('Invalid number of columns at line 3 of given CSV file.');
+
         $iterator = $this->createIterator(__DIR__ . '/different-number-of-columns-between-header-and-values.csv');
         $this->runIterator($iterator);
     }
@@ -79,7 +78,7 @@ class IteratorTest extends TestCase
      */
     private function createIterator(string $csvFile, bool $firstLineIsHeader = true): Iterator
     {
-        $iterator = new Iterator(new Parser(wait(File\open($csvFile, 'rb'))), $firstLineIsHeader);
+        $iterator = new Iterator(new Parser(wait(File\openFile($csvFile, 'rb'))), $firstLineIsHeader);
         return $iterator;
     }
 }

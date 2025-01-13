@@ -12,7 +12,7 @@ class ParserTest extends TestCase
     {
         $rows = [];
         Loop::run(function () use (&$rows) {
-            $parser = new Parser(yield File\open(__DIR__ . '/countries-wihtout-header.csv', 'rb'));
+            $parser = new Parser(yield File\openFile(__DIR__ . '/countries-wihtout-header.csv', 'rb'));
             $expectedRowsParsed = 0;
             while ($row = yield $parser->parseRow()) {
                 $this->assertEquals(++$expectedRowsParsed, $parser->getRowsParsed());
@@ -42,7 +42,7 @@ class ParserTest extends TestCase
     {
         $rows = [];
         Loop::run(function () use (&$rows) {
-            $parser = new Parser(yield File\open(__DIR__ . '/many-countries.csv', 'rb'));
+            $parser = new Parser(yield File\openFile(__DIR__ . '/many-countries.csv', 'rb'));
             while ($row = yield $parser->parseRow()) {
                 $rows[] = $row;
             }
@@ -56,7 +56,7 @@ class ParserTest extends TestCase
     {
         $rows = [];
         Loop::run(function () use (&$rows) {
-            $parser = new Parser(yield File\open(__DIR__ . '/pipe-separated-countries.csv', 'rb'), '|');
+            $parser = new Parser(yield File\openFile(__DIR__ . '/pipe-separated-countries.csv', 'rb'), '|');
             while ($row = yield $parser->parseRow()) {
                 $rows[] = $row;
             }
@@ -84,7 +84,7 @@ class ParserTest extends TestCase
     {
         $rows = [];
         Loop::run(function () use (&$rows) {
-            $parser = new Parser(yield File\open(__DIR__ . '/empty-rows.csv', 'rb'));
+            $parser = new Parser(yield File\openFile(__DIR__ . '/empty-rows.csv', 'rb'));
             while ($row = yield $parser->parseRow()) {
                 $rows[] = $row;
             }
@@ -103,7 +103,7 @@ class ParserTest extends TestCase
     {
         $rows = [];
         Loop::run(function () use (&$rows) {
-            $parser = new Parser(yield File\open(__DIR__ . '/countries-with-newline-in-value.csv', 'rb'));
+            $parser = new Parser(yield File\openFile(__DIR__ . '/countries-with-newline-in-value.csv', 'rb'));
             while ($row = yield $parser->parseRow()) {
                 $rows[] = $row;
             }
@@ -144,7 +144,7 @@ TXT;
     {
         $rows = [];
         Loop::run(function () use (&$rows) {
-            $parser = new Parser(yield File\open(__DIR__ . '/countries-with-escaped-charactes-in-value.csv', 'rb'));
+            $parser = new Parser(yield File\openFile(__DIR__ . '/countries-with-escaped-charactes-in-value.csv', 'rb'));
             while ($row = yield $parser->parseRow()) {
                 $rows[] = $row;
             }
@@ -174,7 +174,7 @@ TXT;
     {
         $rows = [];
         Loop::run(function () use (&$rows) {
-            $parser = new Parser(yield File\open(__DIR__ . '/file-with-bom.csv', 'rb'), ';');
+            $parser = new Parser(yield File\openFile(__DIR__ . '/file-with-bom.csv', 'rb'), ';');
             while ($row = yield $parser->parseRow()) {
                 $rows[] = $row;
             }

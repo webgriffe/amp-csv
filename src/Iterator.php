@@ -6,25 +6,19 @@ use function Amp\call;
 use Amp\Emitter;
 use Amp\Iterator as AmpIterator;
 use Amp\Promise;
-use Amp\File;
 
 class Iterator implements AmpIterator
 {
-    /**
-     * @var Parser
-     */
+    /** @var Parser */
     private $csvParser;
-    /**
-     * @var Emitter
-     */
+
+    /** @var Emitter */
     private $emitter;
-    /**
-     * @var array
-     */
+
+    /** @var array */
     private $header;
-    /**
-     * @var bool
-     */
+
+    /** @var bool */
     private $firstLineIsHeader;
 
     /**

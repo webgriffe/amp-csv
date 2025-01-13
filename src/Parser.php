@@ -9,7 +9,7 @@ use Amp\File;
 class Parser
 {
     /**
-     * @var File\Handle
+     * @var File\File
      */
     private $fileHandle;
     /**
@@ -30,7 +30,7 @@ class Parser
     private $rowsParsed = 0;
 
     public function __construct(
-        File\Handle $fileHandle,
+        File\File $fileHandle,
         string $delimiter = ',',
         string $enclosure = '"',
         string $escape = "\\"
