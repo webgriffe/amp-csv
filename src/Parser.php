@@ -24,7 +24,7 @@ class Parser
     ) {
         $this->delimiter = $delimiter[0];
         $this->enclosure = $enclosure[0];
-        $this->escape    = $escape[0];
+        $this->escape = $escape[0];
     }
 
     public function parseRow(): Promise
